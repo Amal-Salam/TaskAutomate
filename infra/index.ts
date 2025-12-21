@@ -1,24 +1,42 @@
-import * as aws from "@pulumi/aws";
-import * as awsx from "@pulumi/awsx";
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import * as aws from '@pulumi/aws';
+import * as awsx from '@pulumi/awsx';
 
 // VPC with only private subnets (zero-trust)
-const vpc = new awsx.ec2.Vpc("app-vpc", {
+const vpc = new awsx.ec2.Vpc('app-vpc', {
   subnetSpecs: [
-    { type: "Private", cidrMask: 26 },
-    { type: "Private", cidrMask: 26, availabilityZone: "us-east-1b" },
+    { type: 'Private', cidrMask: 26 },
+    { type: 'Private', cidrMask: 26 },
   ],
-  natGateways: { strategy: "Single" },
+  natGateways: { strategy: 'Single' },
 });
 
 // ECR repo with scan-on-push
-const repo = new aws.ecr.Repository("app-repo", {
+const repo = new aws.ecr.Repository('app-repo', {
   imageScanningConfiguration: { scanOnPush: true },
-  imageTagMutability: "IMMUTABLE",
-  lifecyclePolicy: {
+  imageTagMutability: 'IMMUTABLE',
+ 
+});
+
+const lifecyclePolicy = new aws.ecr.LifecyclePolicy("app-repo-lifecycle", {
+  repository: repo.name,
+  policy: JSON.stringify({
     rules: [
-      { rulePriority: 1, description: "Keep last 10", selection: { tagStatus: "any", countType: "imageCountMoreThan", countNumber: 10 }, action: { type: "expire" } },
+      {
+        rulePriority: 1,
+        description: "Keep last 10 images",
+        selection: {
+          tagStatus: "any",
+          countType: "imageCountMoreThan",
+          countNumber: 10,
+        },
+        action: {
+          type: "expire",
+        },
+      },
     ],
-  },
+  }),
 });
 
 // Export for CI
