@@ -1,0 +1,29 @@
+# Test coverage reports
+coverage/
+.nyc_output/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Infrastructure code (if you want to scan with different rules)
+infra/
+
+# Test files (optional - remove if you want to scan tests)
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+**/__tests__/
+**/__mocks__/
+
+# Configuration files that often have false positives
+*.config.js
+*.config.ts
+
+# Documentation
+docs/
+*.md

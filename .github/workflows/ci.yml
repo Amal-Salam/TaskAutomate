@@ -29,10 +29,7 @@ jobs:
         uses: returntocorp/semgrep-action@v1
         with:
           config: auto
-        env:
-          # This tells Semgrep to skip the coverage, node_modules, and dist folders
-          SEMGREP_ARGS: "--exclude coverage --exclude node_modules --exclude dist --exclude infra"
-
+        
       - name: Snyk SCA
         uses: snyk/actions/node@master
         env:
