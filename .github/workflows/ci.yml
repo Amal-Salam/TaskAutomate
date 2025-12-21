@@ -54,11 +54,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: infra/package-lock.json
+    
+      - name: Install dependencies
+        run: npm ci
+        working-directory: infra
+    
       - uses: pulumi/actions@v5
         with:
           command: up
           stack-name: dev
           work-dir: infra
+          upsert: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}
