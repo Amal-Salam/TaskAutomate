@@ -67,7 +67,7 @@ jobs:
         working-directory: infra
 
       - name: Pulumi Up
-        id: Pulumi
+        id: pulumi
         uses: pulumi/actions@v5
         with:
           command: up
