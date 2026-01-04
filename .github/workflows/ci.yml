@@ -52,6 +52,8 @@ jobs:
   deploy-dev:
     needs: lint-test-scan
     runs-on: ubuntu-latest
+    outputs: 
+      repo_url: ${{ steps.pulumi.outputs.repoUrl }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -60,11 +62,13 @@ jobs:
           cache: npm
           cache-dependency-path: infra/package-lock.json
     
-      - name: Install dependencies
-        run: npm ci
+      # - name: Install dependencies
+      - run: npm ci
         working-directory: infra
-    
-      - uses: pulumi/actions@v5
+
+      - name: Pulumi Up
+        id: Pulumi
+        uses: pulumi/actions@v5
         with:
           command: up
           stack-name: dev
@@ -75,3 +79,35 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_TOKEN }}
+
+  build-and-push:
+    needs: deploy-dev 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPO_URL: ${{ needs.deploy-dev.outputs.repo_url }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+         
+          docker build -t $REPO_URL:$IMAGE_TAG .
+     
+          docker push $REPO_URL:$IMAGE_TAG
+         
+          docker tag $REPO_URL:$IMAGE_TAG $REPO_URL:latest
+          docker push $REPO_URL:latest        
