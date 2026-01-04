@@ -3,13 +3,15 @@
 import * as aws from '@pulumi/aws';
 import * as awsx from '@pulumi/awsx';
 
-// VPC with only private subnets (zero-trust)
+// VPC with only public subnets 
 const vpc = new awsx.ec2.Vpc('app-vpc', {
+  numberOfAvailabilityZones: 2,
   subnetSpecs: [
-    { type: 'Private', cidrMask: 26 },
-    { type: 'Private', cidrMask: 26 },
+    { type: "Public", cidrMask: 24 },
+    // { type: 'Private', cidrMask: 26 },
+    // { type: 'Private', cidrMask: 26 },
   ],
-  natGateways: { strategy: 'Single' },
+  natGateways: { strategy: 'None' },
 });
 
 // ECR repo with scan-on-push
