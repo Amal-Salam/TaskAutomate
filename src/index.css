@@ -1,40 +1,8 @@
-/* @import "inter-ui/inter.css";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-    :root {
-        --bg: theme(colors.offwhite);
-        --fg: #111827;
-    }
-
-    .dark {
-        --bg: #0B0F19;
-        --fg: #F9FAFB;
-    }
-
-    body {
-        @apply bg-[var(--bg)] text-[var(--fg)] antialiased;
-    }
-}
-
-@layer components {
-    .card {
-        @apply rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-800/70 backdrop-blur-glass;
-    }
-
-    .ai-sparkle::before {
-        content: "✨";
-        @apply mr-1 text-iris;
-    }
-} */
 
 @import "inter-ui/inter.css";
 @import "tailwindcss";
-/* This replaces base, components, and utilities */
 
-/* In v4, we use the @theme block for custom variables */
+@source "../src";
 @theme {
     --color-offwhite: #f8f8f8;
     /* Ensure 'offwhite' is defined here */
