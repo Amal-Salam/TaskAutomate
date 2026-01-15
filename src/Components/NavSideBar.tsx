@@ -21,7 +21,7 @@ export default function NavSidebar() {
       )}
     >
       <div className="flex items-center justify-between p-4">
-        <div className={twMerge("font-bold text-lg", !open && "hidden")}>PM-AI</div>
+        <div className={twMerge("font-bold text-lg", !open && "hidden")}>TaskAutomate</div>
         <button onClick={() => setOpen((o) => !o)} className="p-2 rounded hover:bg-indigo-600">
           {open ? <FiX size={20} /> : <FiMenu size={20} />}
         </button>
