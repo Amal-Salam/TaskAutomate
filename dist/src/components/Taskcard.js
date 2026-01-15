@@ -1,6 +1,0 @@
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { FiCalendar, FiUser } from "react-icons/fi";
-export default function TaskCard({ title, desc, due, assignee, onClick }) {
-    return (_jsxs("div", { onClick: onClick, className: "card p-4 cursor-pointer hover:shadow-md transition", children: [_jsxs("div", { className: "flex items-start justify-between", children: [_jsx("h3", { className: "font-semibold text-indigo dark:text-iris", children: title }), _jsx("span", { className: "ai-sparkle text-xs text-iris", children: "AI" })] }), _jsx("p", { className: "text-sm mt-2 line-clamp-2", children: desc }), _jsxs("div", { className: "flex items-center gap-4 mt-3 text-xs text-gray-500", children: [due && (_jsxs("span", { className: "flex items-center gap-1", children: [_jsx(FiCalendar, {}), " ", new Date(due).toLocaleDateString()] })), assignee && (_jsxs("span", { className: "flex items-center gap-1", children: [_jsx(FiUser, {}), " ", assignee] }))] })] }));
-}
-//# sourceMappingURL=Taskcard.js.map

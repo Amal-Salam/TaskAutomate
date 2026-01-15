@@ -1,7 +1,23 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "allowArbitraryExtensions": true
   },
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "infra"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts",
+    "infra",
+    "**/*.tsx",
+    "src/App.tsx",
+    "src/Components",
+    "src/Pages",
+    "src/lib"
+  ]
 }

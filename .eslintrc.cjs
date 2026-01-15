@@ -15,7 +15,7 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.cjs','jest.config.js', '*.config.js'],
+  ignorePatterns: ['.eslintrc.cjs','jest.config.js',"vite.config.ts", '*.config.js'],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',

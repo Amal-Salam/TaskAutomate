@@ -1,9 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout.js';
-import Dashboard from './pages/Dashboard.js';
-import PredictiveTimeline from './components/PredictiveTimeline.js';
-// import Settings from './pages/Settings';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import PredictiveTimeline from './components/PredictiveTimeline';
 import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 
 export default function App() {

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 export default function PredictiveTimeline() {
   return (
     <div className="card p-6">

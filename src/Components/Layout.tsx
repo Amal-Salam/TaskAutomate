@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
-import NavSidebar from "./NavSideBar.js";
-import AIIntelligenceBar from "./AIBar.js";
+import NavSidebar from "./NavSideBar";
+import AIIntelligenceBar from "./AIBar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

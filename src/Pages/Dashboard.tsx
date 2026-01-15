@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import TaskCard from "../components/Taskcard.js";
+import TaskCard from "../components/Taskcard";
 
 export default function Dashboard() {
   return (

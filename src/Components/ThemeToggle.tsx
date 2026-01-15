@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { FiSun, FiMoon } from "react-icons/fi";
-import { useTheme } from "../lib/ThemeProvider.js";
+import { useTheme } from "../lib/ThemeProvider";
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
