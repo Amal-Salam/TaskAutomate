@@ -2,7 +2,7 @@
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api.js";
 import { useState } from "react";
-import { BsRobot } from "react-icons/bs";
+import { BsActivity,BsRobot } from "react-icons/bs";
 import { FiRefreshCw } from "react-icons/fi";
 
 interface Props {
@@ -43,7 +43,7 @@ export default function PredictiveTimeline({ workspaceId }: Props) {
     <div className="card p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-indigo dark:text-white flex items-center gap-2">
-          <BsRobot size={20} className="text-iris" />
+          <BsActivity size={20} className="text-iris" />
           Predictive Timeline 
         </h2>
         <button
@@ -68,7 +68,7 @@ export default function PredictiveTimeline({ workspaceId }: Props) {
 
       {suggestions.length === 0 && !loading && (
         <div className="h-32 flex flex-col items-center justify-center text-gray-400 text-sm gap-2">
-          <BsRobot size={28} className="opacity-30" />
+          <BsActivity size={28} className="opacity-30" />
           <p>Click "Suggest Due Dates" to analyse your tasks</p>
         </div>
       )}

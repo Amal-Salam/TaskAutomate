@@ -6,7 +6,6 @@ import TaskCard from "../Components/Taskcard.js";
 import CreateTaskModal from "../Components/CreateTaskModal.js";
 import EditTaskModal from "../Components/EditTaskModal.js";
 import PredictiveTimeline from "../Components/PredictiveTimeline.js"
-// import AIIntelligenceBar from "../Components/AIBar.js";
 import { FiPlus, FiUser, FiUsers, FiCheck, FiX} from "react-icons/fi";
 import { BsRobot } from "react-icons/bs";
 
@@ -29,7 +28,9 @@ export default function Dashboard({ workspaceId }: Props) {
   const myUserId = useQuery(api.tasks.getMyUserId);
   const acceptAI = useMutation(api.tasks.acceptAISuggestion);
   const overrideAI = useMutation(api.tasks.overrideAISuggestion);
-  
+  const members = useQuery(api.workspaces.listMembers, { workspaceId: workspaceId as any });
+  const myMember = (members ?? []).find((m) => m.userId === myUserId?.toString());
+  const isAdmin = myMember?.role === "admin";
 //  console.log("myUserId:", myUserId, typeof myUserId);
 //  console.log("task assigneeIds:", (tasks ?? []).map(t => ({ id: t._id, assigneeId: t.assigneeId, type: typeof t.assigneeId })));
   const visibleTasks = (tasks ?? []).filter((t) => {
@@ -56,13 +57,12 @@ export default function Dashboard({ workspaceId }: Props) {
 
   return (
     <div className="space-y-0">
-      {/* AI intelligence bar — now shows real data */}
-      {/* <AIIntelligenceBar workspaceId={workspaceId} /> */}
-
+      
       <div className="space-y-6 p-6">
         {/* Header */}
+    
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-indigo">Dashboard</h1>
+          <h1 className="text-5xl font-bold font-serif text-shimmer-gold">Dashboard</h1>
           <div className="flex items-center gap-2">
           {/* My Tasks toggle */}
           <button
@@ -76,7 +76,8 @@ export default function Dashboard({ workspaceId }: Props) {
             {myTasksOnly ? <FiUser size={14} /> : <FiUsers size={14} />}
             {myTasksOnly ? "My Tasks" : "All Tasks"}
           </button>
-
+          
+          {isAdmin && ( 
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-4 py-2 bg-glossy-gold animate-shimmer text-white rounded-lg text-sm font-semibold hover:bg-glossy-gold/80 transition"
@@ -84,6 +85,7 @@ export default function Dashboard({ workspaceId }: Props) {
             <FiPlus size={16} />
             New Task
           </button>
+          )}
         </div>
         </div>
   

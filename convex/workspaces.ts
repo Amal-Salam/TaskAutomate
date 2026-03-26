@@ -95,3 +95,150 @@ export const create = mutation({
     return workspaceId;
   },
 });
+
+export const rename = mutation({
+  args: { workspaceId: v.id("workspaces"), name: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+ 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
+      .first();
+    if (!user) throw new Error("User not found");
+ 
+    const me = await ctx.db
+      .query("members")
+      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .first();
+    if (!me || me.role !== "admin") throw new Error("Only admins can rename workspaces");
+ 
+    await ctx.db.patch(args.workspaceId, { name: args.name.trim() });
+  },
+});
+ 
+export const removeMember = mutation({
+  args: { workspaceId: v.id("workspaces"), memberId: v.id("members") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+ 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
+      .first();
+    if (!user) throw new Error("User not found");
+ 
+    const me = await ctx.db
+      .query("members")
+      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .first();
+    if (!me || me.role !== "admin") throw new Error("Only admins can remove members");
+ 
+    // Prevent removing yourself if you're the only admin
+    const target = await ctx.db.get(args.memberId);
+    if (!target) throw new Error("Member not found");
+ 
+    if (target.userId.toString() === user._id.toString()) {
+      const adminCount = (
+        await ctx.db
+          .query("members")
+          .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+          .collect()
+      ).filter((m) => m.role === "admin").length;
+      if (adminCount <= 1) throw new Error("Cannot remove the only admin");
+    }
+ 
+    await ctx.db.delete(args.memberId);
+  },
+});
+ 
+export const changeMemberRole = mutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    memberId: v.id("members"),
+    role: v.union(v.literal("admin"), v.literal("member")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+ 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
+      .first();
+    if (!user) throw new Error("User not found");
+ 
+    const me = await ctx.db
+      .query("members")
+      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .first();
+    if (!me || me.role !== "admin") throw new Error("Only admins can change roles");
+ 
+    // Prevent demoting yourself if you're the only admin
+    const target = await ctx.db.get(args.memberId);
+    if (!target) throw new Error("Member not found");
+ 
+    if (
+      target.userId.toString() === user._id.toString() &&
+      args.role === "member"
+    ) {
+      const adminCount = (
+        await ctx.db
+          .query("members")
+          .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+          .collect()
+      ).filter((m) => m.role === "admin").length;
+      if (adminCount <= 1) throw new Error("Cannot demote the only admin");
+    }
+ 
+    await ctx.db.patch(args.memberId, { role: args.role });
+  },
+});
+ 
+export const deleteWorkspace = mutation({
+  args: { workspaceId: v.id("workspaces") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+ 
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
+      .first();
+    if (!user) throw new Error("User not found");
+ 
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) throw new Error("Workspace not found");
+    if (workspace.ownerId.toString() !== user._id.toString())
+      throw new Error("Only the workspace owner can delete it");
+ 
+    // Delete all members
+    const members = await ctx.db
+      .query("members")
+      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+      .collect();
+    await Promise.all(members.map((m) => ctx.db.delete(m._id)));
+ 
+    // Delete all tasks
+    const tasks = await ctx.db
+      .query("tasks")
+      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+      .collect();
+    await Promise.all(tasks.map((t) => ctx.db.delete(t._id)));
+ 
+    // Delete all invites
+    const invites = await ctx.db
+      .query("invites")
+      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+      .collect();
+    await Promise.all(invites.map((i) => ctx.db.delete(i._id)));
+ 
+    await ctx.db.delete(args.workspaceId);
+  },
+});
+ 

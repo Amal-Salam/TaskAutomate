@@ -29,10 +29,11 @@ export default function AIIntelligenceBar({ workspaceId }: Props) {
       ? `AI has reviewed ${suggested} of ${total} task${total !== 1 ? "s" : ""} — your timeline looks healthy ✨`
       : total === 0
       ? "Create your first task to get started ✨"
-      : "Run AIml suggestions in Predictive Timeline to get smart due date advice ✨";
+      : "Run AI suggestions in Predictive Timeline to get smart due date advice ✨";
 
   return (
-    <div className="relative w-full h-12 bg-linear-to-r from-iris/20 to-iris/10 dark:from-iris/30 dark:to-iris/20 backdrop-blur-glass border-b border-iris/30">
+    <div className="relative w-full h-12 bg-slate-950 backdrop-blur-xl from-iris/20 to-iris/10 dark:from-iris/30 dark:to-iris/20  border-b border-iris/30">
+      
       <div className="mx-auto max-w-7xl flex items-center h-full px-4">
         <BsRobot className="text-iris mr-2 shrink-0" size={20} />
         <span className="text-sm sm:text-base font-medium text-indigo dark:text-iris animate-fade-in truncate">
@@ -42,3 +43,4 @@ export default function AIIntelligenceBar({ workspaceId }: Props) {
     </div>
   );
 }
+

@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 import NavSidebar from "./NavSideBar.js";
+import TopNav from "./TopNavBar.js";
 import AIIntelligenceBar from "./AIBar.js";
 import { useWorkspace } from "../Lib/Workspacecontext.js";
 import { BsRobot } from "react-icons/bs";
@@ -14,6 +15,8 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { activeWorkspace, loading, workspaces, setActiveWorkspaceId, userReady } = useWorkspace();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [newWsName, setNewWsName] = useState("");
   const [creating, setCreating] = useState(false);
   const createWorkspace = useMutation(api.workspaces.create);
@@ -33,16 +36,40 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen flex">
-      <NavSidebar />
+    <div className="min-h-screen flex flex-col bg-offwhite dark:bg-slate-950">
+        <TopNav
+        onMenuClick={() => setSidebarOpen(true)}
+        onCollapseClick={() => setSidebarCollapsed((c) => !c)}
+        sidebarCollapsed={sidebarCollapsed}
+      />
+ 
+    
+     <div className="flex flex-1 overflow-hidden">
+      <NavSidebar
+      open={sidebarOpen}
+          collapsed={sidebarCollapsed}
+          onClose={() => setSidebarOpen(false)}
+          onCollapse={() => setSidebarCollapsed((c) => !c)}
+       />
 
-      <div className="flex-1 flex flex-col ml-16 sm:ml-64">
+        {/* Mobile overlay backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+      
+
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300
+            ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>
         {/* Only show AIBar when a workspace is active */}
         {activeWorkspace && (
           <AIIntelligenceBar workspaceId={activeWorkspace._id} />
         )}
 
-        <main className="flex-1 p-4 sm:p-6 bg-offwhite dark:bg-slate-950">
+        <main className="flex-1 p-4 sm:p-6 overflow-auto">
           {loading ? (
             // Loading state
             <div className="flex items-center justify-center h-64">
@@ -53,15 +80,15 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           ) : workspaces.length === 0 ? (
             // Empty state — no workspaces yet
-            <div className="flex items-center justify-center h-full min-h-[60vh]">
-              <div className="text-center max-w-sm">
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center max-w-sm w-full px-4">
                 <BsRobot size={48} className="text-iris mx-auto mb-4 opacity-60" />
-                <h2 className="text-xl font-bold text-indigo dark:text-white mb-2">
+                <h2 className="text-xl font-bold text-indigo dark:text-glossy-gold mb-2">
                   Welcome to TaskAutomate
                 </h2>
                 <p className="text-sm text-gray-500 mb-6">
                   Create your first workspace to get started. You can invite your
-                  team and let AI aid in managing your deadlines.
+                  team and let AI manage your deadlines.
                 </p>
                 <div className="flex gap-2">
                   <input
@@ -98,6 +125,7 @@ export default function Layout({ children }: LayoutProps) {
             children(activeWorkspace._id)
           )}
         </main>
+        </div>
       </div>
     </div>
   );

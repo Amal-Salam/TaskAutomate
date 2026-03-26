@@ -60,10 +60,10 @@ export default function InviteModal({ workspaceId, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-md mx-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 space-y-5">
+      <div className="relative w-full max-w-md mx-4 bg-white dark:bg-slate-950 rounded-2xl shadow-2xl p-6 space-y-5">
 
         {/* Header */}
         <div className="flex items-center justify-between">

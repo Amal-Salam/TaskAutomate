@@ -6,6 +6,8 @@
 @theme {
     --color-offwhite: #f8f8f8;
     --color-iris: #5d5dff;
+    --color-app-indigo: #2C3C99;
+    --color-app-dark-indigo:#1a2460;
         --color-metallic-gold: #D4AF37;
         --color-gold-low: #8A6621;
         --color-gold-high: #FFF9E3;
@@ -17,6 +19,7 @@
         --color-metallic-rose-gold: #B76E79;
         --color-rose-low: #704248;
         --color-rose-high: #FFE4E8;
+        --surface-container-low: #151b2d;
 
     --backdrop-blur-glass: 12px;
 }
@@ -89,10 +92,28 @@
     color: transparent;
     background-size: 200% auto;
 }
+@utility text-shimmer-gold {
+    background: linear-gradient(135deg,
+            #8A6621 0%,
+            /* Dark Gold (Low) */
+            #FFF9E3 25%,
+            /* Cream/Highlight (Metallic) */
+            #C9A959 40%,
+            /* Mid-tone Gold (High) */
+            #FFF9E3 55%,
+            /* Cream/Highlight (Metallic) */
+            #8A6621 40%
+            /* Dark Gold (Low) */
+        );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
 
 /* --- Shimmer Animation --- */
 @utility animate-shimmer {
-    animation: shimmer 15s linear infinite;
+    animation: shimmer s linear infinite;
 }
 
 @keyframes shimmer {
@@ -111,21 +132,20 @@
 
 
 :root {
-    --bg: var(--color-offwhite);
-    --fg: #111827;
+    color-scheme: light;
 }
 
 .dark {
-    --bg: #0B0F19;
-    --fg: #F9FAFB;
+    color-scheme: dark;
 }
 
 @layer base {
     body {
-        background-color: var(--bg);
-        color: var(--fg);
-        @apply antialiased;
+        @apply bg-offwhite dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 antialiased;
     }
+        * {
+            @apply transition-colors duration-150;
+        }
 }
 
 @layer components {
@@ -140,6 +160,6 @@
 
     .ai-sparkle::before {
         content: "✨";
-        @apply mr-1 text-iris;
+        @apply mr-1 ;
     }
 }

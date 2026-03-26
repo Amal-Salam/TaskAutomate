@@ -7,7 +7,7 @@ export default {
     extend: {
       fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
       colors: {
-        indigo: { DEFAULT: '#2C3C99' },
+        'app-indigo': '#2C3C99' ,
         iris: { DEFAULT: '#766ED5' },
         azure: { DEFAULT: '#0071DB' },
         offwhite: '#F9FAFB',

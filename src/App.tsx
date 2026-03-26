@@ -3,7 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./Components/Layout.js";
 import Dashboard from "./Pages/Dashboard.js";
 import PredictiveTimeline from "./Components/PredictiveTimeline.js";
-import AcceptInvite from "./Components/AcceptInvite.js";
+import AcceptInvite from "./Pages/AcceptInvite.js";
+import WorkspaceSettings from "./Pages/WorkspaceSettings.js";
 import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Dashboard workspaceId={workspaceId} />} />
               <Route path="/timeline" element={<PredictiveTimeline workspaceId={workspaceId} />} />
+              <Route path="/settings" element ={<WorkspaceSettings/>}/>
             </Routes>
           )}
         </Layout>

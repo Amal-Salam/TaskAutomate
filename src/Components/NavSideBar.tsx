@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { useState } from "react";
-import { FiMenu, FiX, FiHome, FiTrendingUp, FiSettings, FiPlus, FiChevronDown, FiCheck,FiUserPlus } from "react-icons/fi";
+import { FiX, FiHome, FiTrendingUp, FiSettings, FiPlus, FiChevronDown, FiCheck,FiUserPlus } from "react-icons/fi";
 import { BsRobot } from "react-icons/bs";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "convex/react";
@@ -17,8 +17,15 @@ const navItems = [
   { label: "Settings", icon: FiSettings, href: "/settings" },
 ];
 
-export default function NavSidebar() {
-  const [open, setOpen] = useState(true);
+interface Props {
+  open: boolean;           // mobile drawer open
+  collapsed: boolean;      // desktop collapsed state
+  onClose: () => void;
+  onCollapse: () => void;
+}
+
+export default function NavSidebar({open, collapsed, onClose}: Props) {
+
   const [wsDropdownOpen, setWsDropdownOpen] = useState(false);
   const [showCreateWs, setShowCreateWs] = useState(false);
   const [newWsName, setNewWsName] = useState("");
@@ -46,36 +53,41 @@ export default function NavSidebar() {
     }
   };
 
+  const handleNav = (href: string) => {
+    navigate(href);
+    onClose(); // close mobile drawer on navigation
+  };
+
   return (
     <>
     <aside
       className={twMerge(
-        "fixed left-0 top-0 h-full bg-slate-950 text-white flex flex-col transition-all duration-300 z-40",
-        open ? "w-64" : "w-16"
-      )}
+       // Base styles
+          "fixed top-14 left-0 h-[calc(100vh-3.5rem)] bg-slate-950 dark:bg-slate-950 text-white flex flex-col z-40 transition-all duration-300",
+          // Desktop: always visible, width depends on collapsed state
+          "hidden lg:flex",
+          collapsed ? "lg:w-16" : "lg:w-64",
+          // Mobile: full-width drawer that slides in/out
+          open && "flex w-72 shadow-2xl"
+        )}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <div className={twMerge("font-bold text-lg tracking-tight", !open && "hidden")}>
-          TaskAutomate
+      {/* Mobile close button */}
+        <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <span className="font-semibold text-sm">Menu</span>
+          <button onClick={onClose} className="p-1 rounded hover:bg-white/10 transition">
+            <FiX size={18} />
+          </button>
         </div>
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="p-2 rounded hover:bg-white/10 transition"
-        >
-          {open ? <FiX size={20} /> : <FiMenu size={20} />}
-        </button>
-      </div>
 
       {/* Workspace Switcher */}
-      {open && (
-        <div className="relative px-3 pt-3 pb-1">
+      {/* Workspace Switcher — hidden when collapsed on desktop */}
+        <div className={twMerge("relative px-3 pt-3 pb-1", collapsed && "lg:hidden")}>
           <button
             onClick={() => setWsDropdownOpen((o) => !o)}
             className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-white/10 hover:bg-white/15 transition text-sm"
           >
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-5 h-5 rounded bg-iris/60 flex items-center justify-center text-xs font-bold shrink-0">
+              <div className="w-5 h-5 rounded bg-white/30 flex items-center justify-center text-xs font-bold shrink-0">
                 {activeWorkspace?.name?.[0]?.toUpperCase() ?? "?"}
               </div>
               <span className="truncate font-medium">
@@ -87,19 +99,22 @@ export default function NavSidebar() {
               className={twMerge("shrink-0 transition-transform", wsDropdownOpen && "rotate-180")}
             />
           </button>
-
-          {/* Dropdown */}
+ 
+          {/* Collapsed state — show just the workspace initial */}
+          {collapsed && (
+            <div className="hidden lg:flex justify-center py-2">
+              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-sm font-bold">
+                {activeWorkspace?.name?.[0]?.toUpperCase() ?? "?"}
+              </div>
+            </div>
+          )}
+ 
           {wsDropdownOpen && (
             <div className="absolute left-3 right-3 top-full mt-1 bg-white dark:bg-gray-800 rounded-xl shadow-xl z-50 overflow-hidden border border-gray-100 dark:border-gray-700">
-
-              {/* Workspace list */}
               {workspaces.map((ws) => (
                 <button
                   key={ws._id}
-                  onClick={() => {
-                    setActiveWorkspaceId(ws._id);
-                    setWsDropdownOpen(false);
-                  }}
+                  onClick={() => { setActiveWorkspaceId(ws._id); setWsDropdownOpen(false); }}
                   className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 transition text-left"
                 >
                   <div className="flex items-center gap-2">
@@ -116,8 +131,7 @@ export default function NavSidebar() {
                   )}
                 </button>
               ))}
-
-              {/* Create new workspace */}
+ 
               <div className="border-t border-gray-100 dark:border-gray-700 p-2">
                 {showCreateWs ? (
                   <div className="flex gap-2 p-1">
@@ -151,49 +165,58 @@ export default function NavSidebar() {
             </div>
           )}
         </div>
-      )}
+ 
 
       {/* Nav items */}
-      <nav className="flex-1 px-2 pt-2 space-y-1">
+      <nav className="flex-1 px-2 pt-2 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const active = location.pathname === item.href;
           return (
             <button
               key={item.href}
-              onClick={() => navigate(item.href)}
+              onClick={() => handleNav(item.href)}
+              title = {collapsed ? item.label : undefined}
               className={twMerge(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-sm",
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-sm ",
+                collapsed ? "lg:justify-center lg:pc-0" : "",
                 active
                   ? "bg-white/20 font-semibold"
                   : "hover:bg-white/10 text-white/80"
               )}
             >
               <item.icon size={18} className="shrink-0" />
-              <span className={twMerge("", !open && "hidden")}>{item.label}</span>
+              <span className={twMerge("transition-all", collapsed && "lg:hidden")}>{item.label}</span>
             </button>
           );
         })}
       </nav>
       {/* Invite Button */}
-      {open && activeWorkspace && (
-          <div className="px-3 pb-3">
-            <button
+      <div className={twMerge("px-3 pb-3", collapsed && "lg:px-2")}>
+        {activeWorkspace &&(
+          <button
               onClick={() => setShowInvite(true)}
-              className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 transition text-sm text-white/90"
+              title={collapsed ? "Invite teammates" : undefined}
+              className={twMerge(
+                "w-full flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 transition text-sm text-white/90",
+                collapsed && "lg:justify-center lg:px-0"
+              )}
             >
               <FiUserPlus size={16} className="shrink-0" />
-              Invite teammates
+              <span className={twMerge(collapsed && "lg:hidden")}>Invite teammates</span>
             </button>
-          </div>
         )}
 
+      </div>
+     
+
       {/* Role badge at bottom */}
-      {open && activeWorkspace?.role && (
-        <div className="px-4 pb-4">
-          <div className="px-3 py-2 rounded-lg bg-white/5 text-xs text-white/50 capitalize">
+
+      {!collapsed && activeWorkspace?.role && (
+        
+          <div className="mt-2 px-3 py-2 rounded-lg bg-white/5 text-xs text-white/50 capitalize">
             {activeWorkspace.role} · {activeWorkspace.name}
           </div>
-        </div>
+        
       )}
     </aside>
 
