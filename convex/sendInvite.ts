@@ -55,6 +55,8 @@ export const sendInvite = action({
     const appUrl = process.env.APP_URL ?? "http://localhost:5173";
     const inviteUrl = `${appUrl}/invite/${token}`;
 
+    const deliverTo = process.env.DEV_EMAIL ?? args.email;
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -63,7 +65,7 @@ export const sendInvite = action({
       },
       body: JSON.stringify({
         from: "TaskAutomate <onboarding@resend.dev>",
-        to: [args.email],
+        to: [deliverTo],
         subject: `You've been invited to ${workspace.name} on TaskAutomate`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
