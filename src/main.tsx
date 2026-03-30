@@ -38,7 +38,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { convex } from "./Lib/convex";
 import { ThemeProvider } from "./Lib/ThemeProvider";
-import { WorkspaceProvider } from "./Lib/Workspacecontext.js";
+import { WorkspaceProvider } from "./Lib/WorkspaceContext.js";
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
