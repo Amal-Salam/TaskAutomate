@@ -1,11 +1,13 @@
 /* eslint-disable prettier/prettier */
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { validateEmail } from "./validators";
 
 // ── Get invite details by token (for the accept page) ───────────────────────
 export const getInviteByToken = query({
   args: { token: v.string() },
   handler: async (ctx, args) => {
+    if(!args.token || args.token.length !== 32) return null;
     const invite = await ctx.db
       .query("invites")
       .withIndex("byToken", (q) => q.eq("token", args.token))
@@ -34,7 +36,18 @@ export const listByWorkspace = query({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
-
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
+      .first();
+    if (!user) return [];
+    // Only members can see invites
+    const member = await ctx.db
+      .query("members")
+      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .first();
+    if (!member) return [];
     return ctx.db
       .query("invites")
       .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
@@ -49,7 +62,8 @@ export const acceptInvite = mutation({
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthorized");
-
+    if (!args.token || args.token.length !== 32) throw new Error("Invalid invite token");
+    
     const invite = await ctx.db
       .query("invites")
       .withIndex("byToken", (q) => q.eq("token", args.token))
@@ -60,6 +74,14 @@ export const acceptInvite = mutation({
     if (invite.expiresAt < Date.now()) {
       await ctx.db.patch(invite._id, { status: "expired" });
       throw new Error("This invite has expired");
+    }
+
+    // Enforce that the accepting user's email matches the invite email
+    const userEmail = identity.email?.toLowerCase() ?? "";
+    if (userEmail && invite.email && userEmail !== invite.email.toLowerCase()) {
+      throw new Error(
+        `This invite was sent to ${invite.email}. Please sign in with that email address to accept.`
+      );
     }
 
     const user = await ctx.db
@@ -89,10 +111,27 @@ export const acceptInvite = mutation({
 
 // ── Revoke an invite ──────────────────────────────────────────────────────────
 export const revoke = mutation({
-  args: { inviteId: v.id("invites") },
+  args: { inviteId: v.id("invites"), workspaceId: v.id("workspaces") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthorized");
+    const user = await ctx.db
+      .query("users")
+      .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
+      .first();
+    if (!user) throw new Error("User not found");
+    // Verify caller is admin of this workspace
+    const member = await ctx.db
+      .query("members")
+      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .first();
+    if (!member || member.role !== "admin") throw new Error("Only admins can revoke invites");
+    // Verify invite belongs to this workspace
+    const invite = await ctx.db.get(args.inviteId);
+    if (!invite) throw new Error("Invite not found");
+    if (invite.workspaceId.toString() !== args.workspaceId.toString())
+      throw new Error("Invite does not belong to this workspace");
     await ctx.db.patch(args.inviteId, { status: "expired" });
   },
 });
@@ -148,8 +187,10 @@ export const createInviteRecord = mutation({
     expiresAt: v.number(),
   },
   handler: async (ctx, args) => {
+    const email = validateEmail(args.email);
     return ctx.db.insert("invites", {
       ...args,
+      email,
       status: "pending",
       createdAt: Date.now(),
     });

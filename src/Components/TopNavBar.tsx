@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { FiMenu, FiSun, FiMoon, FiMonitor, FiChevronLeft,  } from "react-icons/fi";
 import { useTheme } from "../Lib/ThemeProvider.js";
-import { useUser } from "@clerk/clerk-react";
+import { UserButton } from "@clerk/clerk-react";
 
 interface Props {
   onMenuClick: () => void;
@@ -11,7 +11,7 @@ interface Props {
 
 export default function TopNav({ onMenuClick, onCollapseClick, sidebarCollapsed }: Props) {
   const { theme, setTheme } = useTheme();
-  const { user } = useUser();
+
 
   const nextTheme = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
   const ThemeIcon = theme === "light" ? FiSun : theme === "dark" ? FiMoon : FiMonitor;
@@ -56,7 +56,7 @@ export default function TopNav({ onMenuClick, onCollapseClick, sidebarCollapsed 
         </button>
 
         {/* User avatar */}
-        {user && (
+        {/* {user && (
           <div className="w-8 h-8 rounded-full bg-iris/20 flex items-center justify-center text-xs font-bold text-iris overflow-hidden">
             {user.imageUrl ? (
               <img src={user.imageUrl} alt={user.fullName ?? "User"} className="w-full h-full object-cover" />
@@ -64,7 +64,8 @@ export default function TopNav({ onMenuClick, onCollapseClick, sidebarCollapsed 
               (user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "U")[0].toUpperCase()
             )}
           </div>
-        )}
+        )} */}
+        <UserButton/>
       </div>
     </header>
   );

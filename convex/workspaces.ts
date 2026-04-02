@@ -1,6 +1,30 @@
 /* eslint-disable prettier/prettier */
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { validateWorkspaceName } from "./validators";
+
+async function requireMember(ctx: any, workspaceId: any) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) throw new Error("Unauthorized");
+  const user = await ctx.db
+    .query("users")
+    .withIndex("byClerk", (q: any) => q.eq("clerkId", identity.subject))
+    .first();
+  if (!user) throw new Error("User not found");
+  const member = await ctx.db
+    .query("members")
+    .withIndex("byWorkspace", (q: any) => q.eq("workspaceId", workspaceId))
+    .filter((q: any) => q.eq(q.field("userId"), user._id))
+    .first();
+  if (!member) throw new Error("Forbidden");
+  return { user, member };
+}
+ 
+async function requireAdmin(ctx: any, workspaceId: any) {
+  const { user, member } = await requireMember(ctx, workspaceId);
+  if (member.role !== "admin") throw new Error("Forbidden — admin access required");
+  return { user, member };
+}
 
 // Get all workspaces the current user is a member of
 export const listMine = query({
@@ -37,9 +61,7 @@ export const listMine = query({
 export const listMembers = query({
   args: { workspaceId: v.id("workspaces") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
- 
+    await requireMember(ctx, args.workspaceId);
     const memberships = await ctx.db
       .query("members")
       .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
@@ -50,6 +72,7 @@ export const listMembers = query({
         const user = await ctx.db.get(m.userId);
         if (!user) return null;
         return {
+          memberId: m._id.toString(),
           userId: user._id.toString(),
           name: user.name ?? user.email ?? "Unknown",
           email: user.email,
@@ -59,6 +82,7 @@ export const listMembers = query({
     );
  
     return users.filter(Boolean) as {
+      memberId:string;
       userId: string;
       name: string;
       email: string;
@@ -79,9 +103,9 @@ export const create = mutation({
       .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
       .first();
     if (!user) throw new Error("User not found");
-
+    const name = validateWorkspaceName(args.name);
     const workspaceId = await ctx.db.insert("workspaces", {
-      name: args.name.trim(),
+      name,
       ownerId: user._id,
       createdAt: Date.now(),
     });
@@ -99,63 +123,32 @@ export const create = mutation({
 export const rename = mutation({
   args: { workspaceId: v.id("workspaces"), name: v.string() },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthorized");
- 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
-      .first();
-    if (!user) throw new Error("User not found");
- 
-    const me = await ctx.db
-      .query("members")
-      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
-      .filter((q) => q.eq(q.field("userId"), user._id))
-      .first();
-    if (!me || me.role !== "admin") throw new Error("Only admins can rename workspaces");
- 
-    await ctx.db.patch(args.workspaceId, { name: args.name.trim() });
+    await requireAdmin(ctx, args.workspaceId);
+    const name = validateWorkspaceName(args.name);
+    await ctx.db.patch(args.workspaceId,{ name});
   },
-});
+})
+
  
 export const removeMember = mutation({
   args: { workspaceId: v.id("workspaces"), memberId: v.id("members") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthorized");
- 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
-      .first();
-    if (!user) throw new Error("User not found");
- 
-    const me = await ctx.db
-      .query("members")
-      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
-      .filter((q) => q.eq(q.field("userId"), user._id))
-      .first();
-    if (!me || me.role !== "admin") throw new Error("Only admins can remove members");
- 
-    // Prevent removing yourself if you're the only admin
+    const { user } = await requireAdmin(ctx, args.workspaceId);
     const target = await ctx.db.get(args.memberId);
-    if (!target) throw new Error("Member not found");
- 
+    if(!target) throw new Error("Member not found");
+    if (target.workspaceId.toString() !== args.workspaceId.toString())
+      throw new Error("Member does not belong to this workspace");
     if (target.userId.toString() === user._id.toString()) {
-      const adminCount = (
-        await ctx.db
-          .query("members")
-          .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
-          .collect()
-      ).filter((m) => m.role === "admin").length;
+      const adminCount = (await ctx.db
+        .query("members")
+        .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+        .collect()).filter((m) => m.role === "admin").length;
       if (adminCount <= 1) throw new Error("Cannot remove the only admin");
     }
- 
     await ctx.db.delete(args.memberId);
   },
 });
- 
+    
 export const changeMemberRole = mutation({
   args: {
     workspaceId: v.id("workspaces"),
@@ -163,42 +156,22 @@ export const changeMemberRole = mutation({
     role: v.union(v.literal("admin"), v.literal("member")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthorized");
- 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("byClerk", (q) => q.eq("clerkId", identity.subject))
-      .first();
-    if (!user) throw new Error("User not found");
- 
-    const me = await ctx.db
-      .query("members")
-      .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
-      .filter((q) => q.eq(q.field("userId"), user._id))
-      .first();
-    if (!me || me.role !== "admin") throw new Error("Only admins can change roles");
- 
-    // Prevent demoting yourself if you're the only admin
+    const { user } = await requireAdmin(ctx, args.workspaceId);
     const target = await ctx.db.get(args.memberId);
     if (!target) throw new Error("Member not found");
- 
-    if (
-      target.userId.toString() === user._id.toString() &&
-      args.role === "member"
-    ) {
-      const adminCount = (
-        await ctx.db
-          .query("members")
-          .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
-          .collect()
-      ).filter((m) => m.role === "admin").length;
+    if (target.workspaceId.toString() !== args.workspaceId.toString())
+      throw new Error("Member does not belong to this workspace");
+    if (target.userId.toString() === user._id.toString() && args.role === "member") {
+      const adminCount = (await ctx.db
+        .query("members")
+        .withIndex("byWorkspace", (q) => q.eq("workspaceId", args.workspaceId))
+        .collect()).filter((m) => m.role === "admin").length;
       if (adminCount <= 1) throw new Error("Cannot demote the only admin");
     }
- 
     await ctx.db.patch(args.memberId, { role: args.role });
   },
 });
+ 
  
 export const deleteWorkspace = mutation({
   args: { workspaceId: v.id("workspaces") },

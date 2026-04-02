@@ -46,7 +46,7 @@ export default function InviteModal({ workspaceId, onClose }: Props) {
 
   const handleRevoke = async (inviteId: string) => {
     try {
-      await revokeInvite({ inviteId: inviteId as any });
+      await revokeInvite({ inviteId: inviteId as any ,workspaceId: workspaceId as any});
     } catch (e) {
       console.error(e);
     }

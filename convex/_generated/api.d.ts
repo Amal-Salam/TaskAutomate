@@ -13,6 +13,7 @@ import type * as invites from "../invites.js";
 import type * as sendInvite from "../sendInvite.js";
 import type * as tasks from "../tasks.js";
 import type * as users from "../users.js";
+import type * as validators from "../validators.js";
 import type * as workspaces from "../workspaces.js";
 
 import type {
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   sendInvite: typeof sendInvite;
   tasks: typeof tasks;
   users: typeof users;
+  validators: typeof validators;
   workspaces: typeof workspaces;
 }>;
 
