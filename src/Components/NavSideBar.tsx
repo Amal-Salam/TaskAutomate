@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { useState } from "react";
-import { FiX, FiHome, FiTrendingUp, FiSettings, FiPlus, FiChevronDown, FiCheck,FiUserPlus } from "react-icons/fi";
-import { BsRobot } from "react-icons/bs";
+import { FiX, FiHome, FiTrendingUp, FiSettings,  FiChevronDown, FiCheck,FiUserPlus } from "react-icons/fi";
+import { MdOutlineAssignment, MdOutlineGroupAdd } from "react-icons/md";
+import { BiAddToQueue } from "react-icons/bi";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api.js";
@@ -12,8 +13,10 @@ import InviteModal from "./InviteModal.js";
 
 const navItems = [
   { label: "Dashboard", icon: FiHome, href: "/" },
+  { label: "Projects", icon:MdOutlineAssignment, href: "/projects"},
+  { label: "Task Queue", icon: BiAddToQueue, href: "/Kanban-board" },
   { label: "Predictive Timeline", icon: FiTrendingUp, href: "/timeline" },
-  { label: "AI Preferences", icon: BsRobot, href: "/ai-settings" },
+  { label: "Team Activities", icon: MdOutlineGroupAdd, href: "/ai-settings" },
   { label: "Settings", icon: FiSettings, href: "/settings" },
 ];
 
@@ -63,7 +66,7 @@ export default function NavSidebar({open, collapsed, onClose}: Props) {
     <aside
       className={twMerge(
        // Base styles
-          "fixed top-14 left-0 h-[calc(100vh-3.5rem)] bg-slate-950 dark:bg-slate-950 text-white flex flex-col z-40 transition-all duration-300",
+          "fixed top-0 left-0 h-[calc(100vh-3.5rem)] bg-slate-950 dark:bg-app-indigo text-white flex flex-col z-40 transition-all duration-300",
           // Desktop: always visible, width depends on collapsed state
           "hidden lg:flex",
           collapsed ? "lg:w-16" : "lg:w-64",
@@ -157,8 +160,8 @@ export default function NavSidebar({open, collapsed, onClose}: Props) {
                     onClick={() => setShowCreateWs(true)}
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-iris hover:bg-iris/5 rounded-lg transition"
                   >
-                    <FiPlus size={14} />
-                    New workspace
+                    {/* <FiPlus size={14} />
+                    New workspace */}
                   </button>
                 )}
               </div>

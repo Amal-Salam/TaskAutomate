@@ -55,7 +55,7 @@ export const sendInvite = action({
     const appUrl = process.env.APP_URL ?? "http://localhost:5173";
     const inviteUrl = `${appUrl}/invite/${token}`;
 
-    const deliverTo = process.env.DEV_EMAIL ?? args.email;
+    const deliverTo = args.email;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -64,15 +64,15 @@ export const sendInvite = action({
         Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "TaskAutomate <onboarding@resend.dev>",
+        from: " ForeSight <noreply@foresightsync.com>",
         to: [deliverTo],
-        subject: `You've been invited to ${workspace.name} on TaskAutomate`,
+        subject: `You've been invited to ${workspace.name} on ForeSight`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px;">
             <h2 style="color: #1E1B4B; margin-bottom: 8px;">You're invited to join ${workspace.name}</h2>
             <p style="color: #6B7280; margin-bottom: 24px;">
               ${identity.name ?? identity.email} has invited you to collaborate on
-              <strong>${workspace.name}</strong> on TaskAutomate — an AI-powered project
+              <strong>${workspace.name}</strong> on ForeSight — an AI-powered project
               management tool that suggests smart due dates and generates task descriptions.
             </p>
             <a href="${inviteUrl}"

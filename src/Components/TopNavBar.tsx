@@ -2,6 +2,7 @@
 import { FiMenu, FiSun, FiMoon, FiMonitor, FiChevronLeft,  } from "react-icons/fi";
 import { useTheme } from "../Lib/ThemeProvider.js";
 import { UserButton } from "@clerk/clerk-react";
+import { dark } from "@clerk/themes";
 
 interface Props {
   onMenuClick: () => void;
@@ -17,7 +18,7 @@ export default function TopNav({ onMenuClick, onCollapseClick, sidebarCollapsed 
   const ThemeIcon = theme === "light" ? FiSun : theme === "dark" ? FiMoon : FiMonitor;
 
   return (
-    <header className="h-14 bg-white dark:bg-slate-900/70  dark:border-gray-800 flex items-center px-4 gap-3 z-20 sticky top-0">
+    <header className="h-14 w-full bg-white dark:bg-slate-950  dark:border-gray-800 flex items-center px-4 gap-3 z-20 sticky top-0">
       {/* Mobile hamburger */}
       <button
         onClick={onMenuClick}
@@ -39,7 +40,7 @@ export default function TopNav({ onMenuClick, onCollapseClick, sidebarCollapsed 
       {/* App title */}
       <div className="flex items-center gap-2 flex-1">
         <span className="font-bold font-serif italic text-3xl text-indigo dark:text-shimmer-gold tracking-tight">
-          TaskAutomate 
+          ForeSight
         </span>
       </div>
 
@@ -65,7 +66,10 @@ export default function TopNav({ onMenuClick, onCollapseClick, sidebarCollapsed 
             )}
           </div>
         )} */}
-        <UserButton/>
+        <UserButton
+        appearance={{
+         baseTheme:dark
+        }}/>
       </div>
     </header>
   );

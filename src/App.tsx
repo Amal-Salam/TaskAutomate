@@ -5,6 +5,8 @@ import Dashboard from "./Pages/Dashboard.js";
 import PredictiveTimeline from "./Components/PredictiveTimeline.js";
 import AcceptInvite from "./Pages/AcceptInvite.js";
 import WorkspaceSettings from "./Pages/WorkspaceSettings.js";
+import Projects from "./Pages/Projects.js";
+import TaskQueue from "./Pages/TaskQueue.js";
 import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 
 export default function App() {
@@ -19,8 +21,11 @@ export default function App() {
           {(workspaceId) => (
             <Routes>
               <Route path="/" element={<Dashboard workspaceId={workspaceId} />} />
+              <Route path ="/projects" element={<Projects/>}/>
+              <Route path ="/kanban-board" element={<TaskQueue workspaceId={workspaceId}/>}/>
               <Route path="/timeline" element={<PredictiveTimeline workspaceId={workspaceId} />} />
               <Route path="/settings" element ={<WorkspaceSettings/>}/>
+              
             </Routes>
           )}
         </Layout>
