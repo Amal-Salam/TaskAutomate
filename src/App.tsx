@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Routes, Route } from "react-router-dom";
-import Layout from "./Components/Layout.js";
+import Layout from "./Components/Layout2.js";
 import Dashboard from "./Pages/Dashboard.js";
-import PredictiveTimeline from "./Components/PredictiveTimeline.js";
+import PredictiveTimeline from "./Pages/Timeline.js";
 import AcceptInvite from "./Pages/AcceptInvite.js";
 import WorkspaceSettings from "./Pages/WorkspaceSettings.js";
 import Projects from "./Pages/Projects.js";

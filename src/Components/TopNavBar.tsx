@@ -18,7 +18,7 @@ export default function TopNav({ onMenuClick, onCollapseClick, sidebarCollapsed 
   const ThemeIcon = theme === "light" ? FiSun : theme === "dark" ? FiMoon : FiMonitor;
 
   return (
-    <header className="h-14 w-full bg-white dark:bg-slate-950  dark:border-gray-800 flex items-center px-4 gap-3 z-20 sticky top-0">
+    <header className="h-14 w-full bg-white dark:bg-[#151b2d]/70 backdrop-blur-md  dark:border-gray-800 flex items-center px-4 gap-3 z-20 sticky top-0">
       {/* Mobile hamburger */}
       <button
         onClick={onMenuClick}

@@ -7,12 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api.js";
 import CreateTaskModal from "../Components/CreateTaskModal.js";
 import EditTaskModal from "../Components/EditTaskModal.js";
-import PredictiveTimeline from "../Components/PredictiveTimeline.js";
-import {
-  FiPlus, FiUser, FiUsers, FiCheck, FiX,
-  FiAlertTriangle, FiTrendingUp, FiZap,
-  FiChevronRight, FiCalendar, FiClock,
-} from "react-icons/fi";
+import { FiPlus, FiUser, FiUsers,FiAlertTriangle,FiChevronRight, FiCalendar} from "react-icons/fi";
 import { BsRobot } from "react-icons/bs";
 
 interface Props { workspaceId: string; }
@@ -24,9 +19,9 @@ export default function Dashboard({ workspaceId }: Props) {
   const [myTasksOnly, setMyTasksOnly] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
 
-  const tasks    = useQuery(api.tasks.list,             { workspaceId: workspaceId as any });
+  const tasks    = useQuery(api.tasks.list,{ workspaceId: workspaceId as any });
   const myUserId = useQuery(api.tasks.getMyUserId);
-  const members  = useQuery(api.workspaces.listMembers, { workspaceId: workspaceId as any });
+  const members  = useQuery(api.workspaces.listMembers,{ workspaceId: workspaceId as any });
   const acceptAI  = useMutation(api.tasks.acceptAISuggestion);
   const overrideAI = useMutation(api.tasks.overrideAISuggestion);
 
@@ -171,42 +166,7 @@ export default function Dashboard({ workspaceId }: Props) {
         </div>
       </div>
 
-      {/* ── AI suggestions review ──────────────────────────────── */}
-      {pending.length > 0 && (
-        <div className="bg-white dark:bg-[#1C1F2A] rounded-xl border border-[#766ED5]/20 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 dark:border-white/5">
-            <div className="flex items-center gap-2">
-              <FiZap size={13} className="text-[#766ED5]"/>
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#766ED5]">
-                AI Date Suggestions — {pending.length} pending
-              </p>
-            </div>
-          </div>
-          <div className="divide-y divide-gray-50 dark:divide-white/5">
-            {pending.map(task => (
-              <div key={task._id} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3 hover:bg-gray-50 dark:hover:bg-[#262A35] transition-colors">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{task.title}</p>
-                  <p className="text-[11px] text-gray-400 dark:text-[#8f909d] mt-0.5">
-                    AI suggests <span className="text-[#766ED5] font-semibold">
-                      {new Date(task.iddSuggested!).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                    </span>
-                    {task.aiReason && <span> — {task.aiReason}</span>}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button onClick={() => handleAccept(task._id)} className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wide rounded-lg hover:bg-emerald-600 transition-all active:scale-95">
-                    <FiCheck size={11}/> Accept
-                  </button>
-                  <button onClick={() => handleOverride(task._id, task.dueDate)} className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-[#0A0E18] text-gray-600 dark:text-[#C6C5D4] text-[10px] font-black uppercase tracking-wide rounded-lg hover:bg-gray-200 dark:hover:bg-[#262A35] transition-all active:scale-95">
-                    <FiX size={11}/> Keep mine
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      
 
       {/* ── Main matrix: active tasks + live ops ────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -341,26 +301,6 @@ export default function Dashboard({ workspaceId }: Props) {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* ── Predictive Timeline (collapsible) ───────────────────── */}
-      <div className="bg-white dark:bg-[#1C1F2A] rounded-xl border border-gray-100 dark:border-white/5 overflow-hidden">
-        <button
-          onClick={() => setShowTimeline(v => !v)}
-          className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-[#262A35] transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            <FiClock size={14} className="text-[#766ED5]"/>
-            <span className="text-sm font-black uppercase tracking-widest text-gray-700 dark:text-white">Predictive Timeline</span>
-            <span className="text-[10px] px-2 py-0.5 bg-[#766ED5]/10 text-[#766ED5] rounded font-black uppercase">AI</span>
-          </div>
-          <FiChevronRight size={16} className={`text-gray-400 transition-transform duration-200 ${showTimeline ? "rotate-90" : ""}`}/>
-        </button>
-        {showTimeline && (
-          <div className="border-t border-gray-100 dark:border-white/5 p-5">
-            <PredictiveTimeline workspaceId={workspaceId}/>
-          </div>
-        )}
       </div>
 
       {/* Modals */}

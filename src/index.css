@@ -139,6 +139,11 @@
     color-scheme: dark;
 }
 
+.glass-card {
+    backdrop-filter: blur(12px);
+    background: rgba(21, 27, 45, 0.70);
+}
+
 @layer base {
     body {
         @apply bg-offwhite dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 antialiased;
@@ -162,4 +167,5 @@
         content: "✨";
         @apply mr-1 ;
     }
+    
 }

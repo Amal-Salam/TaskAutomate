@@ -9,7 +9,7 @@
  */
 
 import type * as ai from "../ai.js";
-import type * as https from "../http.js";
+import type * as http from "../http.js";
 import type * as invites from "../invites.js";
 import type * as sendInvite from "../sendInvite.js";
 import type * as tasks from "../tasks.js";
@@ -25,7 +25,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   ai: typeof ai;
-  https: typeof https;
+  http: typeof http;
   invites: typeof invites;
   sendInvite: typeof sendInvite;
   tasks: typeof tasks;

@@ -36,7 +36,7 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-offwhite dark:bg-slate-950/70">
+    <div className=" cadence-bg min-h-screen flex flex-col bg-offwhite dark:bg-slate-950/70">
     
      <div className="flex flex-1 overflow-hidden">
       
@@ -58,7 +58,7 @@ export default function Layout({ children }: LayoutProps) {
 
       
 
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 
             ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>
         {/* Only show AIBar when a workspace is active */}
         <TopNav
