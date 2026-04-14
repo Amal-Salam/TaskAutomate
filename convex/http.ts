@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 const http = httpRouter();
 
@@ -42,9 +43,61 @@ http.route({
           return new Response("Email send failed", { status: 500 });
         }
       }
+      return new Response("OK", { status: 200 });
+    }
+    
+    if (payload.type === "user.created") {
+      const data = payload.data;
+      const primaryEmail = data.email_addresses?.find(
+        (e: any) => e.id === data.primary_email_address_id
+      );
+
+    if (primaryEmail?.verification?.status !== "verified") {
+        console.warn("user.created fired but email not verified — skipping upsert");
+        return new Response("OK", { status: 200 });
+      }
+
+      await _ctx.runMutation(internal.users.upsert, {
+        clerkId: data.id,
+        email: primaryEmail.email_address,
+        name: [data.first_name, data.last_name].filter(Boolean).join(" ") || undefined,
+        avatarUrl: data.image_url ?? undefined,
+      });
+
+      return new Response("OK", { status: 200 });
     }
 
+    // ── 3. User updated — covers profile changes and email verification ──────
+    // Also fires when a secondary email gets verified and becomes primary.
+    if (payload.type === "user.updated") {
+      const data = payload.data;
+      const primaryEmail = data.email_addresses?.find(
+        (e: any) => e.id === data.primary_email_address_id
+      );
+
+      if (!primaryEmail) {
+        return new Response("OK", { status: 200 });
+      }
+
+      // Only upsert if the primary email is verified.
+      // This is the gate that makes autoAcceptPendingInvites safe.
+      if (primaryEmail?.verification?.status !== "verified") {
+        return new Response("OK", { status: 200 });
+      }
+
+      await _ctx.runMutation(internal.users.upsert, {
+        clerkId: data.id,
+        email: primaryEmail.email_address,
+        name: [data.first_name, data.last_name].filter(Boolean).join(" ") || undefined,
+        avatarUrl: data.image_url ?? undefined,
+      });
+
+      return new Response("OK", { status: 200 });
+    }
+
+    // Unhandled event types — return 200 so Clerk doesn't retry
     return new Response("OK", { status: 200 });
+
   }),
 });
 

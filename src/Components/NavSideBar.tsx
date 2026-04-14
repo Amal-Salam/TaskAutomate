@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { useState } from "react";
-import { FiX, FiHome, FiTrendingUp, FiSettings,  FiChevronDown, FiCheck,FiUserPlus } from "react-icons/fi";
+import { FiX, FiHome, FiTrendingUp, FiSettings,  FiChevronDown, FiCheck,FiUserPlus, FiUsers, FiRotateCcw } from "react-icons/fi";
 import { MdOutlineAssignment, MdOutlineGroupAdd } from "react-icons/md";
 import { BiAddToQueue } from "react-icons/bi";
 import { twMerge } from "tailwind-merge";
@@ -16,6 +16,8 @@ const navItems = [
   { label: "Projects", icon:MdOutlineAssignment, href: "/projects"},
   { label: "Task Queue", icon: BiAddToQueue, href: "/Kanban-board" },
   { label: "Predictive Timeline", icon: FiTrendingUp, href: "/timeline" },
+  { label: "Workload",           icon: FiUsers,             href: "/workload" },
+  { label: "Retrospective",      icon: FiRotateCcw,         href: "/retrospective" },
   { label: "Team Activities", icon: MdOutlineGroupAdd, href: "/ai-settings" },
   { label: "Settings", icon: FiSettings, href: "/settings" },
 ];
@@ -168,7 +170,16 @@ export default function NavSidebar({open, collapsed, onClose}: Props) {
             </div>
           )}
         </div>
- 
+        
+      {/* Cmd+K hint — hidden when collapsed */}
+        {/* {!collapsed && (
+          <div className="px-3 pb-1">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              <span className="text-[10px] text-white/40 flex-1">Quick create task…</span>
+              <kbd className="text-[9px] font-black px-1.5 py-0.5 rounded bg-white/10 text-white/50">⌘K</kbd>
+            </div>
+          </div>
+        )} */}
 
       {/* Nav items */}
       <nav className="flex-1 px-2 pt-2 space-y-1 overflow-y-auto">

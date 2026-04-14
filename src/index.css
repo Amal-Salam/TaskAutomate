@@ -144,6 +144,21 @@
     background: rgba(21, 27, 45, 0.70);
 }
 
+/* Ensure the scrollbar plugin classes take effect */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 12px !important;
+}
+
+.scrollbar-thumb-iris::-webkit-scrollbar-thumb {
+  background-color: #5d5dff !important; /* Your iris color */
+  border-radius: 9999px !important;
+  border: 3px solid #111827 !important; /* Matches your track-red-100 */
+}
+
+.scrollbar-track-100::-webkit-scrollbar-track {
+  background-color: #111827 !important;
+  
+}
 @layer base {
     body {
         @apply bg-offwhite dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 antialiased;
@@ -155,7 +170,7 @@
 
 @layer components {
     .card {
-        @apply rounded-xl shadow-sm border border-gray-200 bg-white/70 backdrop-blur-[var(--backdrop-blur-glass)];
+        @apply rounded-xl shadow-sm border border-gray-200 bg-white/70 backdrop-blur-(--backdrop-blur-glass);
     }
 
     /* Support for dark mode inside the component */

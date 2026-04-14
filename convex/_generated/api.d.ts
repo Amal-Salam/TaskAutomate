@@ -12,6 +12,8 @@ import type * as ai from "../ai.js";
 import type * as http from "../http.js";
 import type * as invites from "../invites.js";
 import type * as sendInvite from "../sendInvite.js";
+import type * as sprints from "../sprints.js";
+import type * as taskHistory from "../taskHistory.js";
 import type * as tasks from "../tasks.js";
 import type * as users from "../users.js";
 import type * as validators from "../validators.js";
@@ -28,6 +30,8 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   invites: typeof invites;
   sendInvite: typeof sendInvite;
+  sprints: typeof sprints;
+  taskHistory: typeof taskHistory;
   tasks: typeof tasks;
   users: typeof users;
   validators: typeof validators;

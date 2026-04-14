@@ -2,6 +2,41 @@
 import { internalMutation, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+// ── Helper: auto-accept any pending invites for this email ──────────────────
+async function autoAcceptPendingInvites(ctx: any, userId: any, email: string) {
+  const normalised = email.trim().toLowerCase();
+ 
+  const pendingInvites = await ctx.db
+    .query("invites")
+    .withIndex("byEmail", (q: any) => q.eq("email", normalised))
+    .collect();
+ 
+  const validInvites = pendingInvites.filter(
+    (inv: any) => inv.status === "pending" && inv.expiresAt > Date.now()
+  );
+ 
+  for (const invite of validInvites) {
+    // Check they're not already a member (shouldn't be, but guard anyway)
+    const alreadyMember = await ctx.db
+      .query("members")
+      .withIndex("byWorkspace", (q: any) => q.eq("workspaceId", invite.workspaceId))
+      .filter((q: any) => q.eq(q.field("userId"), userId))
+      .first();
+ 
+    if (!alreadyMember) {
+      await ctx.db.insert("members", {
+        workspaceId: invite.workspaceId,
+        userId,
+        role: invite.role,
+      });
+    }
+ 
+    // Mark invite accepted
+    await ctx.db.patch(invite._id, { status: "accepted" });
+  }
+}
+ 
+
 // Called by the Clerk webhook — internal so it can't be called from the browser
 export const upsert = internalMutation({
   args: {
@@ -24,13 +59,15 @@ export const upsert = internalMutation({
       return existing._id;
     }
 
-    return ctx.db.insert("users", {
+    const userId = await ctx.db.insert("users", {
       clerkId: args.clerkId,
-      email: args.email,
+      email: args.email.trim().toLowerCase(),
       name: args.name,
       avatarUrl: args.avatarUrl,
       createdAt: Date.now(),
     });
+    await autoAcceptPendingInvites(ctx, userId, args.email);
+    return userId;
   },
 });
 
@@ -51,7 +88,7 @@ export const ensureExists = mutation({
 
     return ctx.db.insert("users", {
       clerkId: identity.subject,
-      email: identity.email ?? "",
+      email: identity.email?.trim().toLowerCase() ?? "",
       name: identity.name ?? undefined,
       avatarUrl: identity.profileUrl ?? undefined,
       createdAt: Date.now(),

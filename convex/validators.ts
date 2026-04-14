@@ -44,7 +44,22 @@ export function validateEmail(email: string): string {
 }
 
 export function validateStoryPoints(points: number): number {
-  if (!VALID_STORY_POINTS.includes(points as any))
-    throw new Error(`Story points must be one of: ${VALID_STORY_POINTS.join(", ")}.`);
-  return points;
+  const valid = [...VALID_STORY_POINTS];
+
+  if (valid.includes(points as any)) return points;
+  if (points <= 0) return 1;
+  if (points >=13) return 13;
+
+  return valid.reduce((nearest,candidate) =>
+    Math.abs(candidate - points) < Math.abs(nearest - points) ? candidate : nearest);
+}
+ 
+export function validateInventoryItems(items?: any[]) {
+  if (!items) return [];
+
+  return items.map((item) => {
+    if (!item.name.trim()) throw new Error("Inventory item must have a name");
+    if (item.quantity <= 0) throw new Error("Quantity must be > 0");
+    return item;
+  });
 }

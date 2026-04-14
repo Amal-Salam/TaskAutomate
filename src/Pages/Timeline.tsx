@@ -2,6 +2,7 @@
 import { useAction, useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api.js";
 import { useState } from "react";
+import BurndownChart from "../Components/BurndownChart.js";
 import { BsActivity, BsRobot } from "react-icons/bs";
 import { FiRefreshCw, FiZap, FiCheck, FiX } from "react-icons/fi";
 
@@ -21,10 +22,12 @@ export default function PredictiveTimeline({ workspaceId }: Props) {
   const [loading, setLoading]         = useState(false);
   const [lastRun, setLastRun]         = useState<string | null>(null);
   const [error, setError]             = useState("");
+  const [focusSuggestions, setFocusSuggestions] = useState<any[]>([]);
 
   const suggestDueDates = useAction(api.ai.suggestDueDates);
   const acceptAI        = useMutation(api.tasks.acceptAISuggestion);
   const overrideAI      = useMutation(api.tasks.overrideAISuggestion);
+  const suggestFocus = useAction(api.ai.suggestFocusTime);
 
   const tasks   = useQuery(api.tasks.list, { workspaceId: workspaceId as any });
   const allTasks = tasks ?? [];
@@ -34,8 +37,12 @@ export default function PredictiveTimeline({ workspaceId }: Props) {
     setLoading(true);
     setError("");
     try {
-      const result = await suggestDueDates({ workspaceId: workspaceId as any });
+      const [result, focusResult] = await Promise.all([
+        suggestDueDates({ workspaceId: workspaceId as any }),
+        suggestFocus({workspaceId: workspaceId as any})
+      ]);
       setSuggestions((result as Suggestion[]) ?? []);
+      setFocusSuggestions(focusResult ?? []);
       setLastRun(new Date().toLocaleTimeString());
     } catch (e) {
       setError("Failed to generate suggestions. Check your GEMINI_API_KEY.");
@@ -90,6 +97,8 @@ export default function PredictiveTimeline({ workspaceId }: Props) {
         </p>
       )}
 
+      
+
       {/* ── AI Suggestions Review ────────────────────────────────── */}
       {pending.length > 0 && (
         <div className="bg-white dark:bg-app-indigo/30 backdrop-blur-md  rounded-xl border border-[#766ED5]/20 overflow-hidden">
@@ -137,6 +146,8 @@ export default function PredictiveTimeline({ workspaceId }: Props) {
         </div>
       )}
 
+      
+
       {/* ── Timeline Suggestions ─────────────────────────────────── */}
       <div className="bg-white dark:bg-[#151b2d]/70 backdrop-blur-md rounded-xl border border-gray-100 dark:border-white/5 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100 dark:border-white/5 flex items-center gap-2">
@@ -174,6 +185,26 @@ export default function PredictiveTimeline({ workspaceId }: Props) {
         )}
       </div>
 
+      {/* 2. Insert the BurndownChart section */}
+      <section className="bg-white dark:bg-[#151b2d]/70 backdrop-blur-md rounded-xl border border-gray-100 dark:border-white/5 p-5">
+        <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-[#8f909d] mb-4">
+          Project Progress
+        </h2>
+        <BurndownChart workspaceId={workspaceId} />
+      </section>
+
+      {focusSuggestions.length > 0 && (
+  <div className="mt-4 p-4 rounded-xl bg-iris/5 border border-iris/10">
+    <h3 className="text-xs font-bold text-iris mb-2">AI Suggested Focus Blocks</h3>
+    {focusSuggestions.map((block, i) => (
+      <p key={i} className="text-sm text-gray-700 dark:text-gray-300">
+        {block.time}: {block.activity}
+      </p>
+    ))}
+  </div>
+)}
+
     </div>
+    
   );
 }
